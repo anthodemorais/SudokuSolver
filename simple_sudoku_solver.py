@@ -55,6 +55,7 @@ class Solver:
         # print(result)
 
         if result == 'solved':
+            print(self.sudoku)
             return result
         elif result == 'not finished' and not nothing_changed:
             self.prev_sudoku = self.sudoku
@@ -76,6 +77,7 @@ class Solver:
                     self.eliminate_possibilities(randoms_index=randoms_index+1)
                     result = self.check_winner()
                     if result == "solved":
+                        print(self.sudoku)
                         return result
                     elif result == "error":
                         self.sudoku = self.versions[randoms_index]
@@ -168,6 +170,6 @@ class Solver:
 
 solver = Solver("./sudokus/sudoku2.txt")
 solver.update_squares()
-solver.eliminate_possibilities()
+result = solver.eliminate_possibilities()
 print("--- %s seconds ---" % (time.time() - start_time))
-print(solver.sudoku)
+print(result)
