@@ -29,47 +29,7 @@ def get_empties(grid):
                 empties_pos.append([x, y, start_line, start_col, possibles])
     return empties_pos
 
-# def get_next_empty(grid, empty_pos):
-#     for i, line in enumerate(grid):
-#         for j, n in enumerate(line):
-#             if n == 0:
-#                 empty_pos[0] = i
-#                 empty_pos[1] = j
-#                 return True
-#     return False
-
-# def in_row(grid, n, empty_pos):
-#     for i in grid[empty_pos[0]]:
-#         if n == i:
-#             return True
-#     return False
-
-# def in_col(grid, n, empty_pos):
-#     for k in range(9):
-#         if n == grid[k][empty_pos[1]]:
-#             return True
-#     return False
-
-# def in_box(grid, n):
-#     start_line = floor(empty_pos[0] / 3) * 3
-#     start_col = floor(empty_pos[1] / 3) * 3
-
-#     box_numbers = [grid[x][y] for y in range(start_col, start_col+3) for x in range(start_line, start_line+3) if grid[x][y] != 0]
-#     return True if n in box_numbers else False
-
 def can_be_placed(grid, n, current, empties_pos, current_empty):
-    # col = empty_pos[1]
-    # for i, number in enumerate(line):
-    #     if n == number or n == grid[i][col]:
-    #         return False
-    # return True
-
-    # if n in grid[x]:
-    #     return False
-    # for k in range(9):
-    #     if n == grid[k][y]:
-    #         return False
-    # return True
 
     for empty_pos in empties_pos[:current_empty]:
         if grid[empty_pos[0]][empty_pos[1]] == n:
@@ -79,12 +39,7 @@ def can_be_placed(grid, n, current, empties_pos, current_empty):
                     return False
             if empty_pos[1] == current[1]:
                     return False
-        # if 3*(empty_pos[0] // 3) == square_x:
-        #     if 3*(empty_pos[1] // 3) == square_y:
-        #         if grid[empty_pos[0]][empty_pos[1]] == n:
-        #             return False
     return True
-    # return not in_row(grid, n, empty_pos) and not in_col(grid, n, empty_pos)
 
 def try_numbers(grid, empties_pos, current_empty=0, stop_index=99):
     if current_empty >= stop_index:
