@@ -1,16 +1,32 @@
-# def get_boxes_numbers(grid):
-#     boxes_numbers = {}
-#     for i in range(0, 9, 3):
-#         for j in range(0, 9, 3):
-#             boxes_numbers[str(i) + "," + str(j)] = [grid[x][y] for y in range(j, j+3) for x in range(i, i+3) if grid[x][y] != 0]
-#     return boxes_numbers
+def get_boxes_numbers(grid):
+    boxes_remainings = {}
+    for i in range(0, 9, 3):
+        for j in range(0, 9, 3):
+            box_numbers = [grid[x][y] for y in range(j, j+3) for x in range(i, i+3) if grid[x][y] != 0]
+            boxes_remainings[str(i) + str(j)] = [k for k in range(1, 10) if k not in box_numbers]
+    return boxes_remainings
 
 def get_empties(grid):
     empties_pos = []
+    boxes_remainings = get_boxes_numbers(grid)
     for x, line in enumerate(grid):
         for y, n in enumerate(line):
             if n == 0:
-                empties_pos.append([x, y])
+                start_line = (x // 3) * 3
+                start_col = (y // 3) * 3
+                box_remainings = boxes_remainings[str(start_line) + str(start_col)]
+                possibles = []
+                for nb in box_remainings:
+                    is_valid = True
+                    if not nb in line:
+                        for l in range(9):
+                            if nb == grid[l][y]:
+                                is_valid = False
+                    else:
+                        is_valid = False
+                    if is_valid:
+                        possibles.append(nb)
+                empties_pos.append([x, y, start_line, start_col, possibles])
     return empties_pos
 
 # def get_next_empty(grid, empty_pos):
@@ -41,39 +57,51 @@ def get_empties(grid):
 #     box_numbers = [grid[x][y] for y in range(start_col, start_col+3) for x in range(start_line, start_line+3) if grid[x][y] != 0]
 #     return True if n in box_numbers else False
 
-def can_be_placed(grid, n, empty_pos):
+def can_be_placed(grid, n, current, empties_pos, current_empty):
     # col = empty_pos[1]
     # for i, number in enumerate(line):
     #     if n == number or n == grid[i][col]:
     #         return False
     # return True
-    if n in grid[empty_pos[0]]:
-        return False
-    for k in range(9):
-        if n == grid[k][empty_pos[1]]:
-            return False
+
+    # if n in grid[x]:
+    #     return False
+    # for k in range(9):
+    #     if n == grid[k][y]:
+    #         return False
+    # return True
+
+    for empty_pos in empties_pos[:current_empty]:
+        if grid[empty_pos[0]][empty_pos[1]] == n:
+            if empty_pos[2] == current[2] and empty_pos[3] == current[3]:
+                    return False
+            if empty_pos[0] == current[0]:
+                    return False
+            if empty_pos[1] == current[1]:
+                    return False
+        # if 3*(empty_pos[0] // 3) == square_x:
+        #     if 3*(empty_pos[1] // 3) == square_y:
+        #         if grid[empty_pos[0]][empty_pos[1]] == n:
+        #             return False
     return True
     # return not in_row(grid, n, empty_pos) and not in_col(grid, n, empty_pos)
 
 def try_numbers(grid, empties_pos, current_empty=0, stop_index=99):
-    empty_pos = [0, 0]
     if current_empty >= stop_index:
         return True
-    empty_pos = empties_pos[current_empty]
 
-    x, y = empty_pos[0], empty_pos[1]
-    start_line = (x // 3) * 3
-    start_col = (y // 3) * 3
+    empty_pos = empties_pos[current_empty]
+    x, y, square_x, square_y, possibles = empty_pos[0], empty_pos[1], empty_pos[2], empty_pos[3], empty_pos[4]
 
     # box_numbers = boxes_numbers[str(start_line) + "," + str(start_col)]
-    box_numbers = [grid[x][y] for y in range(start_col, start_col+3) for x in range(start_line, start_line+3) if grid[x][y] != 0]
-    for n in range(1, 10):
-        if n not in box_numbers:
-            if can_be_placed(grid, n, empty_pos):
-                grid[x][y] = n
-                if try_numbers(grid, empties_pos, current_empty=current_empty+1, stop_index=stop_index):
-                    return True
-                grid[x][y] = 0
+    # box_numbers = [grid[i][j] for j in range(square_y, square_y+3) for i in range(square_x, square_x+3) if grid[i][j] != 0]
+    for n in possibles:
+        # if n not in box_numbers:
+        if can_be_placed(grid, n, empty_pos, empties_pos, current_empty):
+            grid[x][y] = n
+            if try_numbers(grid, empties_pos, current_empty=current_empty+1, stop_index=stop_index):
+                return True
+            grid[x][y] = 0
     
     return False
 
@@ -100,13 +128,16 @@ grid_hard = [
 ]
 
 # boxes_numbers = get_boxes_numbers(grid_medium)
-empties_pos = get_empties(grid_hard)
-if not try_numbers(grid_hard, empties_pos, 0, len(empties_pos)):
+# print(get_empties(grid_medium))
+empties_pos = get_empties(grid_medium)
+if not try_numbers(grid_medium, empties_pos, 0, len(empties_pos)):
     print('Impossible')
-
+# print(grid_medium)
 # iter en for
 # appeler 1x next empty
 # calc 1x box_numbers
+
+# pré-calculer possibilités par case vide pour ne boucler quu sur les possibilités et ne vérifier que par rapport aux cases qui étaient vides
 
 #  ncalls  tottime  percall  cumtime  percall filename:lineno(function)
 #  69175317  345.162    0.000  345.162    0.000 backtracking.py:1(get_next_empty)

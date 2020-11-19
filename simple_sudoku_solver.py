@@ -168,8 +168,7 @@ class Solver:
                     return "error"
         return "solved"
 
-solver = Solver("./sudokus/sudoku2.txt")
+solver = Solver("./sudokus/sudoku4.txt")
 solver.update_squares()
-result = solver.eliminate_possibilities()
+solver.eliminate_possibilities()
 print("--- %s seconds ---" % (time.time() - start_time))
-print(result)
