@@ -6,6 +6,17 @@ def get_boxes_numbers(grid):
             boxes_remainings[str(i) + str(j)] = [k for k in range(1, 10) if k not in box_numbers]
     return boxes_remainings
 
+def get_cells_to_check(empties_pos):
+    for i, empty_pos in enumerate(empties_pos):
+        x, y, square_x, square_y = empty_pos[1], empty_pos[2], empty_pos[3], empty_pos[4]
+        for to_check in empties_pos[:i]:
+            if to_check[1] == x:
+                empty_pos[6].append({1: to_check[1], 2: to_check[2]})
+            elif to_check[2] == y:
+                empty_pos[6].append({1: to_check[1], 2: to_check[2]})
+            elif to_check[3] == square_x and to_check[4] == square_y:
+                empty_pos[6].append({1: to_check[1], 2: to_check[2]})
+
 def get_empties(grid):
     empties_pos = []
     boxes_remainings = get_boxes_numbers(grid)
@@ -26,19 +37,25 @@ def get_empties(grid):
                         is_valid = False
                     if is_valid:
                         possibles.append(nb)
-                empties_pos.append([x, y, start_line, start_col, possibles])
+                empties_pos.append({1:x, 2:y, 3:start_line, 4:start_col, 5:possibles, 6:[]})
+    get_cells_to_check(empties_pos)
     return empties_pos
 
-def can_be_placed(grid, n, current, empties_pos, current_empty):
+# def can_be_placed(grid, n, current, empties_pos):
+#     for empty_pos in empties_pos:
+#         if grid[empty_pos[1]][empty_pos[2]] == n:
+#             if empty_pos[3] == current[3] and empty_pos[4] == current[4]:
+#                     return False
+#             if empty_pos[1] == current[1]:
+#                     return False
+#             if empty_pos[2] == current[2]:
+#                     return False
+#     return True
 
-    for empty_pos in empties_pos[:current_empty]:
-        if grid[empty_pos[0]][empty_pos[1]] == n:
-            if empty_pos[2] == current[2] and empty_pos[3] == current[3]:
-                    return False
-            if empty_pos[0] == current[0]:
-                    return False
-            if empty_pos[1] == current[1]:
-                    return False
+def can_be_placed(grid, n, to_check):
+    for position in to_check:
+        if grid[position[1]][position[2]] == n:
+            return False
     return True
 
 def try_numbers(grid, empties_pos, current_empty=0, stop_index=99):
@@ -46,17 +63,16 @@ def try_numbers(grid, empties_pos, current_empty=0, stop_index=99):
         return True
 
     empty_pos = empties_pos[current_empty]
-    x, y, square_x, square_y, possibles = empty_pos[0], empty_pos[1], empty_pos[2], empty_pos[3], empty_pos[4]
-
     # box_numbers = boxes_numbers[str(start_line) + "," + str(start_col)]
     # box_numbers = [grid[i][j] for j in range(square_y, square_y+3) for i in range(square_x, square_x+3) if grid[i][j] != 0]
-    for n in possibles:
+    for n in empty_pos[5]:
         # if n not in box_numbers:
-        if can_be_placed(grid, n, empty_pos, empties_pos, current_empty):
-            grid[x][y] = n
+        # if can_be_placed(grid, n, empty_pos, empties_pos[:current_empty]):
+        if can_be_placed(grid, n, empty_pos[6]):
+            grid[empty_pos[1]][empty_pos[2]] = n
             if try_numbers(grid, empties_pos, current_empty=current_empty+1, stop_index=stop_index):
                 return True
-            grid[x][y] = 0
+            grid[empty_pos[1]][empty_pos[2]] = 0
     
     return False
 
@@ -87,37 +103,41 @@ grid_hard = [
 empties_pos = get_empties(grid_medium)
 if not try_numbers(grid_medium, empties_pos, 0, len(empties_pos)):
     print('Impossible')
-# print(grid_medium)
-# iter en for
-# appeler 1x next empty
-# calc 1x box_numbers
+# print(grid_hard)
 
-# pré-calculer possibilités par case vide pour ne boucler quu sur les possibilités et ne vérifier que par rapport aux cases qui étaient vides
-
-#  ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-#  69175317  345.162    0.000  345.162    0.000 backtracking.py:1(get_next_empty)
-# 69175317/1  340.492    0.000 1447.129 1447.129 backtracking.py:27(try_numbers)
-#  69175316  203.209    0.000  203.209    0.000 backtracking.py:36(<listcomp>)
-# 124706048  165.573    0.000  165.573    0.000 backtracking.py:14(<listcomp>)
-# 307144580  155.268    0.000  558.266    0.000 backtracking.py:24(can_be_placed)
-# 124706048  134.710    0.000  300.283    0.000 backtracking.py:13(in_col)
-# 307144580  102.714    0.000  102.714    0.000 backtracking.py:10(in_row)
-#         1    0.013    0.013    0.013    0.013 {built-in method builtins.print}
-#         1    0.000    0.000 1447.142 1447.142 backtracking.py:1(<module>)
-#         1    0.000    0.000 1447.142 1447.142 {built-in method builtins.exec}
-#         1    0.000    0.000    0.000    0.000 {method 'disab
-
-# 445495282 function calls (376319966 primitive calls) in 498.594 seconds
+# 379367256 function calls (310191940 primitive calls) in 401.863 seconds
 
 #    Ordered by: internal time
 
 #    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-# 69175317/1  199.903    0.000  498.594  498.594 backtracking.py:58(try_numbers)
-# 307144580  169.124    0.000  169.124    0.000 backtracking.py:44(can_be_placed)
-#  69175316  129.567    0.000  129.567    0.000 backtracking.py:69(<listcomp>)
-#         1    0.000    0.000    0.000    0.000 backtracking.py:8(get_empties)
-#         1    0.000    0.000  498.594  498.594 backtracking.py:8(<module>)
-#        64    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
-#         1    0.000    0.000  498.594  498.594 {built-in method builtins.exec}
-#         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+# 310190708  291.995    0.000  291.995    0.000 backtracking.py:62(can_be_placed)
+# 69175317/1  109.866    0.000  401.861  401.861 backtracking.py:68(try_numbers)
+#         1    0.001    0.001    0.001    0.001 backtracking.py:9(get_cells_to_check)
+#         1    0.000    0.000    0.001    0.001 backtracking.py:27(get_empties)
+#         1    0.000    0.000    0.000    0.000 {built-in method builtins.print}
+#         1    0.000    0.000  401.863  401.863 backtracking.py:1(<module>)
+#      1205    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
+#         1    0.000    0.000    0.000    0.000 backtracking.py:1(get_boxes_numbers)
+#         9    0.000    0.000    0.000    0.000 backtracking.py:5(<listcomp>)
+#         1    0.000    0.000  401.863  401.863 {built-in method builtins.exec}
+#         9    0.000    0.000    0.000    0.000 backtracking.py:6(<listcomp>)
 #         1    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+#         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+# 379366913 function calls (310191597 primitive calls) in 338.330 seconds
+
+#    Ordered by: internal time
+
+#    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+# 310190708  233.774    0.000  233.774    0.000 backtracking.py:55(can_be_placed)
+# 69175317/1  104.556    0.000  338.329  338.329 backtracking.py:61(try_numbers)
+#         1    0.000    0.000    0.001    0.001 backtracking.py:20(get_empties)
+#         1    0.000    0.000    0.000    0.000 backtracking.py:9(get_cells_to_check)
+#       863    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
+#         1    0.000    0.000    0.000    0.000 backtracking.py:1(get_boxes_numbers)
+#         9    0.000    0.000    0.000    0.000 backtracking.py:5(<listcomp>)
+#         1    0.000    0.000  338.330  338.330 backtracking.py:1(<module>)
+#         1    0.000    0.000  338.330  338.330 {built-in method builtins.exec}
+#         9    0.000    0.000    0.000    0.000 backtracking.py:6(<listcomp>)
+#         1    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+#         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
